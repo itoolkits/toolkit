@@ -10,7 +10,7 @@ type Response struct {
 	SCode     int    `json:"code"`
 	Msg       string `json:"msg"`
 	Data      any    `json:"data,omitempty"`
-	RequestID string `json:"requestID"`
+	RequestID string `json:"request_id"`
 	Cost      int64  `json:"cost"`
 }
 
