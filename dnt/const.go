@@ -29,6 +29,8 @@ const (
 
 const (
 	RootDomain = "."
+
+	defaultSOAMBox = "sa.zone.com."
 )
 
 const (

@@ -112,3 +112,46 @@ func (h *HashSet[T]) RemoveHashSet(hs ...*HashSet[T]) {
 		})
 	}
 }
+
+// Intersection get intersection set
+func (h *HashSet[T]) Intersection(target *HashSet[T]) *HashSet[T] {
+	if target == nil || target.Size() < 1 || h.Size() < 1 {
+		return nil
+	}
+
+	a := h
+	b := target
+	if a.Size() > b.Size() {
+		a = target
+		b = h
+	}
+
+	rst := NewHashSet[T]()
+	a.Range(func(ele T) bool {
+		if b.Contains(ele) {
+			rst.Add(ele)
+		}
+		return true
+	})
+
+	return rst
+}
+
+// Union get Union set
+func (h *HashSet[T]) Union(target *HashSet[T]) *HashSet[T] {
+	rst := NewHashSet[T]()
+	rst.AddHashSet(target, h)
+	return rst
+}
+
+// Except get Except by set
+func (h *HashSet[T]) Except(target *HashSet[T]) *HashSet[T] {
+	rst := NewHashSet[T]()
+	h.Range(func(ele T) bool {
+		if target != nil && !target.Contains(ele) {
+			rst.Add(ele)
+		}
+		return true
+	})
+	return rst
+}

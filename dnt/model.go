@@ -46,20 +46,15 @@ func (r *RR) Unmarshal(zone, view, str string) error {
 	r.RData = strings.Join(seg[4:], " ")
 	r.View = view
 
-	zone = strings.ToLower(zone)
-	zone = strings.Trim(zone, ".")
+	zone = FixDomain(zone)
 	if zone == "" {
 		return nil
 	}
-	// parse hostname
-	idx := strings.LastIndex(r.Domain, zone)
-	if idx < 0 {
-		return fmt.Errorf("parse hostname error, %s, %s", zone, str)
-	} else if idx == 0 {
-		r.Hostname = "@"
-	} else {
-		r.Hostname = r.Domain[:idx-1]
+	hostname, err := AdaptHostname(zone, r.Domain)
+	if err != nil {
+		return err
 	}
+	r.Hostname = hostname
 	return nil
 }
 

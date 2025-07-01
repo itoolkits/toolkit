@@ -28,6 +28,10 @@ type Dig struct {
 	sigAlgorithm string
 	sigName      string
 	sigSecretKey string
+
+	subnetIPFamily uint16 // 1-ipv4, 2-ipv6
+	subnetIP       net.IP
+	subnetIPMask   uint8
 }
 
 // NewDig - create dig struct
@@ -41,6 +45,13 @@ func NewDig(domain, ns string, rType uint16) *Dig {
 		rType:         rType,
 		port:          defaultDNSServerPort,
 	}
+}
+
+// SetSubNet set sub net, family(1:ipv4, 2:ipv6)
+func (d *Dig) SetSubNet(addr net.IP, ipFamily uint16, mask uint8) {
+	d.subnetIP = addr
+	d.subnetIPFamily = ipFamily
+	d.subnetIPMask = mask
 }
 
 // SetRetry - change retry info
@@ -96,10 +107,34 @@ func (d *Dig) Query() ([]dns.RR, error) {
 	return rrs, err
 }
 
+func (d *Dig) buildSubNetExtra() *dns.OPT {
+	return &dns.OPT{
+		Hdr: dns.RR_Header{
+			Name:   ".",
+			Rrtype: dns.TypeOPT,
+			Class:  dns.DefaultMsgSize,
+		},
+		Option: []dns.EDNS0{
+			&dns.EDNS0_SUBNET{
+				Code:          dns.EDNS0SUBNET,
+				Family:        d.subnetIPFamily,
+				SourceNetmask: d.subnetIPMask,
+				SourceScope:   0,
+				Address:       d.subnetIP,
+			},
+		},
+	}
+}
+
 // dnsQuery - private function, dns query, support protocol
 func (d *Dig) dnsQuery(protocol string) ([]dns.RR, error) {
 	msg := &dns.Msg{}
 	msg.SetQuestion(dns.Fqdn(d.domain), d.rType)
+
+	// edns subnet
+	if d.subnetIP != nil && len(d.subnetIP) > 0 {
+		msg.Extra = append(msg.Extra, d.buildSubNetExtra())
+	}
 
 	// Create client
 	client := &dns.Client{
@@ -143,5 +178,12 @@ func (d *Dig) dnsQuery(protocol string) ([]dns.RR, error) {
 	}
 
 	// Convert RR and return
-	return rMsg.Answer, nil
+	if len(rMsg.Answer) > 0 {
+		return rMsg.Answer, nil
+	}
+
+	if d.rType == dns.TypeNS {
+		return rMsg.Ns, nil
+	}
+	return nil, nil
 }

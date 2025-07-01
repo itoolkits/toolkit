@@ -27,6 +27,13 @@ type RqstCtx struct {
 // initRequestCTX - init request ctx
 func (r *RqstCtx) init(c *gin.Context) {
 	r.setRequestID(c)
+	if r.Response == nil {
+		r.Response = &Response{
+			SCode:     http.StatusOK,
+			Msg:       "",
+			RequestID: r.RequestID,
+		}
+	}
 	c.Set(requestContext, r)
 }
 
@@ -49,41 +56,33 @@ func (r *RqstCtx) SetHTTPCode(code int) {
 // SetErrorResponse - set error response
 func (r *RqstCtx) SetErrorResponse(httpCode int, sCode int, msg string) {
 	r.SetHTTPCode(httpCode)
-	r.Response = &Response{
-		SCode:     sCode,
-		Msg:       msg,
-		RequestID: r.RequestID,
-	}
+	r.Response.SCode = sCode
+	r.Response.Msg = msg
+	r.Response.RequestID = r.RequestID
 }
 
 // SetStatusResponse - set status response
 func (r *RqstCtx) SetStatusResponse(sCode int, msg string, args ...any) {
 	r.SetHTTPCode(http.StatusOK)
 	msg = fmt.Sprintf(msg, args...)
-	r.Response = &Response{
-		SCode:     sCode,
-		Msg:       msg,
-		RequestID: r.RequestID,
-	}
+	r.Response.SCode = sCode
+	r.Response.Msg = msg
+	r.Response.RequestID = r.RequestID
 }
 
 // SetOKResponse - set ok response
 func (r *RqstCtx) SetOKResponse() {
-	r.Response = &Response{
-		SCode:     http.StatusOK,
-		Msg:       "",
-		RequestID: r.RequestID,
-	}
+	r.Response.SCode = http.StatusOK
+	r.Response.Msg = ""
+	r.Response.RequestID = r.RequestID
 }
 
 // SetData - set data
 func (r *RqstCtx) SetData(data any) {
-	r.Response = &Response{
-		SCode:     http.StatusOK,
-		Msg:       "",
-		Data:      data,
-		RequestID: r.RequestID,
-	}
+	r.Response.SCode = http.StatusOK
+	r.Response.Msg = ""
+	r.Response.Data = data
+	r.Response.RequestID = r.RequestID
 }
 
 // GetCTX - get context
