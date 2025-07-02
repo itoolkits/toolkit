@@ -251,6 +251,13 @@ func (d *RecordConv) fromRecordVal() (string, error) {
 			return a.String(), nil
 		}
 		return "", fmt.Errorf("record %s convert RR error", d.Record.String())
+	case dns.TypeCAA:
+		if caa, ok := d.Record.(*dns.CAA); ok {
+			return strconv.Itoa(int(caa.Flag)) + " " +
+				caa.Tag + " " +
+				caa.Value, nil
+		}
+		return "", fmt.Errorf("record %s convert RR error", d.Record.String())
 	case dns.TypeSRV:
 		if a, ok := d.Record.(*dns.SRV); ok {
 			return strconv.Itoa(int(a.Priority)) + " " +
