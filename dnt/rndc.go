@@ -255,7 +255,7 @@ func (d *RecordConv) fromRecordVal() (string, error) {
 		if caa, ok := d.Record.(*dns.CAA); ok {
 			return strconv.Itoa(int(caa.Flag)) + " " +
 				caa.Tag + " " +
-				caa.Value, nil
+				"\"" + caa.Value + "\"", nil
 		}
 		return "", fmt.Errorf("record %s convert RR error", d.Record.String())
 	case dns.TypeSRV:
