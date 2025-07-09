@@ -31,3 +31,12 @@ func MkDir(dir string) error {
 func RemoveFile(path string) error {
 	return os.RemoveAll(path)
 }
+
+// TruncFile trunc file
+func TruncFile(path string) error {
+	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	return file.Close()
+}
