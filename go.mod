@@ -3,6 +3,7 @@ module github.com/itoolkits/toolkit
 go 1.21
 
 require (
+	github.com/prometheus/client_golang v1.16.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-cmd/cmd v1.4.3
 	github.com/go-sql-driver/mysql v1.7.0
