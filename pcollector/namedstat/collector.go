@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"math"
 	"strings"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -15,6 +16,8 @@ import (
 type StatsCollector struct {
 	rndc     string
 	statFile string
+
+	waitSec int
 }
 
 // NewStatsCollector create collector
@@ -25,12 +28,17 @@ func NewStatsCollector(rndc string, statFile string) *StatsCollector {
 	}
 }
 
+func (c *StatsCollector) SetWaitSec(sec int) {
+	c.waitSec = sec
+}
+
 // Describe implements prometheus.Collector.
 func (c *StatsCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- up
 	//ch <- bootTime
 	ch <- nameServerStatistics
 	ch <- incomingQueries
+	ch <- outgoingRCode
 	ch <- incomingRequests
 	ch <- incomingRequests
 	ch <- socketIO
@@ -61,6 +69,10 @@ func (c *StatsCollector) Collect(ch chan<- prometheus.Metric) {
 		return
 	}
 	slog.Info("bind exporter build stats file success", "output", out)
+
+	if c.waitSec > 0 {
+		time.Sleep(time.Duration(c.waitSec) * time.Second)
+	}
 
 	statsInfo, err := sf.Parse()
 	if err != nil {
