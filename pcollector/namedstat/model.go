@@ -28,6 +28,11 @@ var (
 		"Name Server Statistics Counters.",
 		[]string{"type"}, nil,
 	)
+	outgoingRCode = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "outgoing_rcode_total"),
+		"Outgoing Rcodes.",
+		[]string{"type"}, nil,
+	)
 	outgoingQueries = prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "outgoing_queries_total"),
 		"Outgoing Queries.",

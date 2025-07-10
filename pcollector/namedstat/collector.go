@@ -113,6 +113,18 @@ func (c *StatsCollector) Collect(ch chan<- prometheus.Metric) {
 			}
 		}
 	}
+
+	// Outgoing RCodes
+	if mds, ok := statsInfo.SubMetric["Outgoing Rcodes"]; ok {
+		for _, md := range mds {
+			for key, value := range md.Metric {
+				ch <- prometheus.MustNewConstMetric(
+					outgoingRCode, prometheus.CounterValue, value, key,
+				)
+			}
+		}
+	}
+
 	// Resolver Statistics  resolverQueries
 	if mds, ok := statsInfo.SubMetric["Resolver Statistics"]; ok {
 		for _, md := range mds {
