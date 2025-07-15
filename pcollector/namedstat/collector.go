@@ -1,4 +1,5 @@
 // named stats collector
+// refer: https://github.com/qiangmzsx/bind_stats_exporter
 
 package namedstat
 
