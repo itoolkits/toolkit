@@ -67,8 +67,7 @@ func (m *MutexLockDao) updateVer(name string, hisVer, preVer int64) (int64, erro
 
 // BeginTx - begin transaction
 func (m *MutexLockDao) BeginTx(opt *sql.TxOptions) *gorm.DB {
-	m.db = m.db.Begin(opt)
-	return m.db
+	return m.db.Begin(opt)
 }
 
 // CommitTx - commit transaction

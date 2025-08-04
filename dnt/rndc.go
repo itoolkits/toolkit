@@ -248,7 +248,12 @@ func (d *RecordConv) fromRecordVal() (string, error) {
 		return "", fmt.Errorf("record %s convert RR error", d.Record.String())
 	case dns.TypeSOA:
 		if a, ok := d.Record.(*dns.SOA); ok {
-			return a.String(), nil
+			return a.Ns + " " + a.Mbox +
+				" " + strconv.FormatInt(int64(a.Serial), 10) +
+				" " + strconv.FormatInt(int64(a.Refresh), 10) +
+				" " + strconv.FormatInt(int64(a.Retry), 10) +
+				" " + strconv.FormatInt(int64(a.Expire), 10) +
+				" " + strconv.FormatInt(int64(a.Minttl), 10), nil
 		}
 		return "", fmt.Errorf("record %s convert RR error", d.Record.String())
 	case dns.TypeCAA:

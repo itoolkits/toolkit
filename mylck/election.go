@@ -43,19 +43,19 @@ func (n *Election) WrapJob() {
 
 // elect - elect master
 func (n *Election) elect() {
-	n.MutexLockDao.BeginTx(nil)
+	mutexDao := NewMutexLockDao(n.MutexLockDao.BeginTx(nil))
 	defer func() {
-		_ = n.MutexLockDao.RollbackTx()
+		_ = mutexDao.RollbackTx()
 	}()
 
-	mut, err := n.MutexLockDao.GetByName(n.MasterKey)
+	mut, err := mutexDao.GetByName(n.MasterKey)
 	if err != nil {
 		slog.Error("get mutex lock error", "masterKey", n.MasterKey, "error", err)
 		return
 	}
 
 	if mut == nil || mut.ID < 1 {
-		err = n.MutexLockDao.Save(&MutexLock{
+		err = mutexDao.Save(&MutexLock{
 			Name:      n.MasterKey,
 			Ver:       1,
 			Info:      n.NodeName,
@@ -66,7 +66,7 @@ func (n *Election) elect() {
 			return
 		}
 
-		err = n.MutexLockDao.CommitTx()
+		err = mutexDao.CommitTx()
 		if err != nil {
 			slog.Error("mutex tx commit error", "nodeName", n.NodeName, "error", err)
 			return
@@ -78,13 +78,13 @@ func (n *Election) elect() {
 	var rows int64
 	// lock time out
 	if time.Since(mut.UpdatedAt) > n.Timeout {
-		rows, err = n.MutexLockDao.UpdateByInfo(n.MasterKey, mut.Info, &MutexLock{
+		rows, err = mutexDao.UpdateByInfo(n.MasterKey, mut.Info, &MutexLock{
 			Info:      n.NodeName,
 			UpdatedAt: time.Now(),
 		})
 	} else {
 		// update by self
-		rows, err = n.MutexLockDao.UpdateByInfo(n.MasterKey, n.NodeName, &MutexLock{
+		rows, err = mutexDao.UpdateByInfo(n.MasterKey, n.NodeName, &MutexLock{
 			Info:      n.NodeName,
 			UpdatedAt: time.Now(),
 		})
@@ -100,7 +100,7 @@ func (n *Election) elect() {
 		return
 	}
 
-	err = n.MutexLockDao.CommitTx()
+	err = mutexDao.CommitTx()
 	if err != nil {
 		slog.Error("mutex tx commit error", "nodeName", n.NodeName, "error", err)
 		return
