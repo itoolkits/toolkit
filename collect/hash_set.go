@@ -14,6 +14,15 @@ func NewHashSet[T comparable]() *HashSet[T] {
 	}
 }
 
+// NewHashSetByEle create hash set by element
+func NewHashSetByEle[T comparable](args ...T) *HashSet[T] {
+	c := &HashSet[T]{
+		container: map[T]struct{}{},
+	}
+	c.Add(args...)
+	return c
+}
+
 // NewHashSetBySlice - create hash set by slice
 func NewHashSetBySlice[T comparable](arr []T) *HashSet[T] {
 	h := NewHashSet[T]()
@@ -37,7 +46,7 @@ func NewHashSetByHashSet[T comparable](hs ...*HashSet[T]) *HashSet[T] {
 }
 
 // Add - add element
-func (h *HashSet[T]) Add(args ...T) {
+func (h *HashSet[T]) Add(args ...T) *HashSet[T] {
 	for i := range args {
 		// in most cases, init value is meaningless
 		if args[i] == h.nilVal {
@@ -45,6 +54,7 @@ func (h *HashSet[T]) Add(args ...T) {
 		}
 		h.container[args[i]] = nilStructObj
 	}
+	return h
 }
 
 // Size - container size
@@ -59,13 +69,15 @@ func (h *HashSet[T]) Contains(ele T) bool {
 }
 
 // Remove - remove
-func (h *HashSet[T]) Remove(ele T) {
+func (h *HashSet[T]) Remove(ele T) *HashSet[T] {
 	delete(h.container, ele)
+	return h
 }
 
 // Clear - clear container
-func (h *HashSet[T]) Clear() {
+func (h *HashSet[T]) Clear() *HashSet[T] {
 	clear(h.container)
+	return h
 }
 
 // Range - loop element
@@ -88,9 +100,9 @@ func (h *HashSet[T]) ToSlice() []T {
 }
 
 // AddHashSet - add hash set
-func (h *HashSet[T]) AddHashSet(hs ...*HashSet[T]) {
+func (h *HashSet[T]) AddHashSet(hs ...*HashSet[T]) *HashSet[T] {
 	if len(hs) < 1 {
-		return
+		return h
 	}
 	for i := range hs {
 		hs[i].Range(func(ele T) bool {
@@ -98,12 +110,13 @@ func (h *HashSet[T]) AddHashSet(hs ...*HashSet[T]) {
 			return true
 		})
 	}
+	return h
 }
 
 // RemoveHashSet - remove hash set
-func (h *HashSet[T]) RemoveHashSet(hs ...*HashSet[T]) {
+func (h *HashSet[T]) RemoveHashSet(hs ...*HashSet[T]) *HashSet[T] {
 	if len(hs) < 1 {
-		return
+		return h
 	}
 	for i := range hs {
 		hs[i].Range(func(ele T) bool {
@@ -111,6 +124,7 @@ func (h *HashSet[T]) RemoveHashSet(hs ...*HashSet[T]) {
 			return true
 		})
 	}
+	return h
 }
 
 // Intersection get intersection set
@@ -154,4 +168,10 @@ func (h *HashSet[T]) Except(target *HashSet[T]) *HashSet[T] {
 		return true
 	})
 	return rst
+}
+
+// CompareHashSet compare hashset
+func CompareHashSet[T comparable](a, b *HashSet[T]) (*HashSet[T], *HashSet[T]) {
+	return NewHashSetByHashSet(a).RemoveHashSet(b),
+		NewHashSetByHashSet(b).RemoveHashSet(a)
 }
