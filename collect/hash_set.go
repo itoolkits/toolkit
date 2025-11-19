@@ -4,14 +4,24 @@ package collect
 
 type HashSet[T comparable] struct {
 	container map[T]struct{}
-	nilVal    T // do not init it
+
+	allowNilVal bool
+	nilVal      T // do not init it
 }
 
 // NewHashSet create hash set
 func NewHashSet[T comparable]() *HashSet[T] {
 	return &HashSet[T]{
-		container: map[T]struct{}{},
+		container:   map[T]struct{}{},
+		allowNilVal: false,
 	}
+}
+
+// NewHashSetAllowNilVal create hash set, allow nil val
+func NewHashSetAllowNilVal[T comparable]() *HashSet[T] {
+	obj := NewHashSet[T]()
+	obj.SetAllowNilVal(true)
+	return obj
 }
 
 // NewHashSetByEle create hash set by element
@@ -45,11 +55,16 @@ func NewHashSetByHashSet[T comparable](hs ...*HashSet[T]) *HashSet[T] {
 	return h
 }
 
+// SetAllowNilVal set allow nil value
+func (h *HashSet[T]) SetAllowNilVal(allowNilVal bool) {
+	h.allowNilVal = allowNilVal
+}
+
 // Add - add element
 func (h *HashSet[T]) Add(args ...T) *HashSet[T] {
 	for i := range args {
 		// in most cases, init value is meaningless
-		if args[i] == h.nilVal {
+		if h.allowNilVal && args[i] == h.nilVal {
 			continue
 		}
 		h.container[args[i]] = nilStructObj
