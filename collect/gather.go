@@ -53,12 +53,11 @@ func (g *Gather[T]) init() {
 
 	for {
 		select {
-		case <-g.done:
-			g.callback()
-			return
 		case ele, ok := <-g.ch:
 			if !ok {
 				g.callback()
+				close(g.done)
+				g.tck.Stop()
 				return
 			}
 			g.batch = append(g.batch, ele)
@@ -78,9 +77,9 @@ func (g *Gather[T]) resetTicker() {
 }
 
 // Close - close gather
-func (g *Gather[T]) Close() {
+func (g *Gather[T]) Close() <-chan struct{} {
 	close(g.ch)
-	close(g.done)
+	return g.done
 }
 
 // Put add element
