@@ -25,6 +25,8 @@ type StreamLoad struct {
 	Password string
 
 	Timeout time.Duration
+
+	Headers map[string]string
 }
 
 // auth - doris auth
@@ -59,6 +61,10 @@ func (s *StreamLoad) LoadData(data []byte) error {
 	request.Header.Add("timeout", "10")
 	request.Header.Add("format", "json")
 	request.Header.Add("strip_outer_array", "true")
+
+	for k, v := range s.Headers {
+		request.Header.Set(k, v)
+	}
 
 	response, err := client.Do(request)
 	if err != nil {
